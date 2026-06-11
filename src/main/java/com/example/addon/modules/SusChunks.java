@@ -2,13 +2,17 @@ package com.example.addon.modules;
 
 import com.example.addon.AddonTemplate;
 
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 
 import net.minecraft.core.BlockPos;
@@ -30,6 +34,11 @@ public class SusChunks extends Module {
     );
 
     private final Set<String> foundChunks = new HashSet<>();
+    private final Set<BlockPos> stashCenters = new HashSet<>();
+
+    private final Color lineColor = new Color(255, 0, 0, 255);
+    private final Color sideColor = new Color(255, 0, 0, 40);
+    private final Color tracerColor = new Color(255, 255, 0, 255);
 
     private long lastScan;
 
@@ -44,25 +53,84 @@ public class SusChunks extends Module {
     @Override
     public void onActivate() {
         foundChunks.clear();
+        stashCenters.clear();
         lastScan = 0;
     }
 
     @Override
     public void onDeactivate() {
         foundChunks.clear();
+        stashCenters.clear();
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-    if (mc.level == null) return;
+        if (mc.level == null) return;
 
-    long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
 
-    if (now - lastScan < 3000) return;
-    lastScan = now;
+        if (now - lastScan < 3000) return;
+        lastScan = now;
 
-    scanChunks();
-}
+        scanChunks();
+    }
+
+    @EventHandler
+    private void onRender(Render3DEvent event) {
+        for (BlockPos center : stashCenters) {
+            double minX = center.getX() - 8;
+            double minZ = center.getZ() - 8;
+
+            double maxX = center.getX() + 8;
+            double maxZ = center.getZ() + 8;
+
+            event.renderer.box(
+                minX,
+                mc.player.getY() - 2,
+                minZ,
+                maxX,
+                mc.player.getY() + 20,
+                maxZ,
+                sideColor,
+                lineColor,
+                ShapeMode.Both,
+                0
+            );
+
+            event.renderer.line(
+                RenderUtils.center.x,
+                RenderUtils.center.y,
+                RenderUtils.center.z,
+                center.getX() + 0.5,
+                center.getY() + 0.5,
+                center.getZ() + 0.5,
+                tracerColor
+            );
+        }
+
+        for (BlockEntity be : Utils.blockEntities()) {
+            if (!(be instanceof ChestBlockEntity
+                || be instanceof BarrelBlockEntity
+                || be instanceof ShulkerBoxBlockEntity
+                || be instanceof EnderChestBlockEntity
+                || be instanceof HopperBlockEntity)) continue;
+
+            BlockPos pos = be.getBlockPos();
+
+            event.renderer.box(
+                pos.getX(),
+                pos.getY(),
+                pos.getZ(),
+                pos.getX() + 1,
+                pos.getY() + 1,
+                pos.getZ() + 1,
+                sideColor,
+                lineColor,
+                ShapeMode.Both,
+                0
+            );
+        }
+    }
 
     private void scanChunks() {
         Set<String> checked = new HashSet<>();
@@ -82,13 +150,24 @@ public class SusChunks extends Module {
             if (score >= threshold.get() && !foundChunks.contains(chunkId)) {
                 foundChunks.add(chunkId);
 
-                int x = (chunkX << 4) + 8;
-                int z = (chunkZ << 4) + 8;
+                int centerX = (chunkX << 4) + 8;
+                int centerZ = (chunkZ << 4) + 8;
+
+                stashCenters.add(
+                    new BlockPos(
+                        centerX,
+                        pos.getY(),
+                        centerZ
+                    )
+                );
 
                 ChatUtils.info(
-                    "§cStash Found! §7X: " + x +
-                    " Z: " + z +
-                    " Score: " + score
+                    "§cStash Found! §7X: "
+                        + centerX
+                        + " Z: "
+                        + centerZ
+                        + " Score: "
+                        + score
                 );
             }
         }
