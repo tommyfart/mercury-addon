@@ -1,30 +1,24 @@
 package com.example.addon;
 
 import com.example.addon.modules.Mercury;
-import com.example.addon.modules.StorageEsp;
-import com.example.addon.modules.StorageTracers;
-import com.example.addon.modules.SusChunks;
 
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
 
-    public static final meteordevelopment.meteorclient.systems.modules.Category CATEGORY =
-        new meteordevelopment.meteorclient.systems.modules.Category("Mercury");
+    public static final Category CATEGORY = new Category("Mercury");
 
     @Override
     public void onInitialize() {
-        LOG.info("Initializing Mercury Addon");
+        LOG.info("Initializing Mercury");
 
         Modules.get().add(new Mercury());
-        Modules.get().add(new StorageEsp());
-        Modules.get().add(new StorageTracers());
-        Modules.get().add(new SusChunks());
     }
 
     @Override
@@ -39,6 +33,6 @@ public class AddonTemplate extends MeteorAddon {
 
     @Override
     public GithubRepo getRepo() {
-        return new GithubRepo("MeteorDevelopment", "meteor-addon-template");
+        return new GithubRepo("your-github-name", "mercury-addon");
     }
 }
