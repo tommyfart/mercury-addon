@@ -8,6 +8,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.orbit.EventHandler;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.*;
@@ -50,17 +52,17 @@ public class SusChunks extends Module {
         foundChunks.clear();
     }
 
-    @Override
-    public void onTick() {
-        if (mc.level == null) return;
+    @EventHandler
+private void onTick(TickEvent.Post event) {
+    if (mc.level == null) return;
 
-        long now = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
-        if (now - lastScan < 3000) return;
-        lastScan = now;
+    if (now - lastScan < 3000) return;
+    lastScan = now;
 
-        scanChunks();
-    }
+    scanChunks();
+}
 
     private void scanChunks() {
         Set<String> checked = new HashSet<>();
