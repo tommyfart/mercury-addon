@@ -1,6 +1,7 @@
 package com.example.addon;
 
 import com.example.addon.modules.Mercury;
+import com.example.addon.modules.SusChunks;
 
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.GithubRepo;
@@ -19,6 +20,7 @@ public class AddonTemplate extends MeteorAddon {
         LOG.info("Initializing Mercury");
 
         Modules.get().add(new Mercury());
+        Modules.get().add(new SusChunks());
     }
 
     @Override
