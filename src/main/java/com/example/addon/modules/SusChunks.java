@@ -53,7 +53,7 @@ public class SusChunks extends Module {
     }
 
     @EventHandler
-private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Post event) {
     if (mc.level == null) return;
 
     long now = System.currentTimeMillis();
